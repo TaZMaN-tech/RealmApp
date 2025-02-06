@@ -62,13 +62,7 @@ final class TasksViewController: UITableViewController {
     // MARK: - UITableViewDelegate
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         
-        var task: Task
-        
-        if indexPath.section == 0 {
-            task = currentTasks[indexPath.row]
-        } else {
-            task = completedTasks[indexPath.row]
-        }
+        let task = (indexPath.section == 0) ? currentTasks[indexPath.row] : completedTasks[indexPath.row]
         
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [unowned self] _, _, _ in
             storageManager.delete(task)
@@ -82,10 +76,18 @@ final class TasksViewController: UITableViewController {
             isDone(true)
         }
         
-        let doneAction = UIContextualAction(style: .normal, title: "Done") { [unowned self] _, _, isDone in
-            storageManager.done(task)
+        let isTaskCompleted = task.isComplete
+        let doneActionTitle = isTaskCompleted ? "Undone" : "Done"
+        
+        let doneAction = UIContextualAction(style: .normal, title: doneActionTitle) { [unowned self] _, _, isDone in
+            storageManager.toggleCompletion(task)
             completedTasks = taskList.tasks.filter("isComplete = true")
-            tableView.moveRow(at: indexPath, to: IndexPath(row: completedTasks.count - 1, section: 1))
+            currentTasks = taskList.tasks.filter("isComplete == false")
+            
+            let newSection = isTaskCompleted ? 0 : 1
+            let newIndexPath = IndexPath(row: newSection == 0 ? currentTasks.count - 1 : completedTasks.count - 1, section: newSection)
+            
+            tableView.moveRow(at: indexPath, to: newIndexPath)
             isDone(true)
         }
         
