@@ -51,7 +51,7 @@ final class TaskListViewController: UITableViewController {
             content.secondaryText = "0"
             cell.accessoryType = .none
         } else {
-            content.secondaryText = taskList.tasks.count.formatted()
+            content.secondaryText = taskList.tasks.filter { !$0.isComplete }.count.formatted()
             cell.accessoryType = .none
         }
         
